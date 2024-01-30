@@ -28,7 +28,7 @@
 import { getCSSIcon } from 'components/icons';
 
 {
-	class LibrariesCollectionsBox extends XULElementBase {
+	class LibrariesCollectionsBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-libraries-collections" data-pane="libraries-collections" extra-buttons="add">
 				<html:div class="body"/>
@@ -61,11 +61,7 @@ import { getCSSIcon } from 'components/icons';
 				return;
 			}
 			this._item = item;
-			// Getting linked items is an async process, so start by rendering without them
 			this._linkedItems = [];
-			this.render();
-			
-			this._updateLinkedItems();
 		}
 
 		get mode() {
@@ -75,7 +71,6 @@ import { getCSSIcon } from 'components/icons';
 		set mode(mode) {
 			this._mode = mode;
 			this.setAttribute('mode', mode);
-			this.render();
 		}
 
 		init() {
@@ -90,7 +85,6 @@ import { getCSSIcon } from 'components/icons';
 				);
 				this._section.open = true;
 			});
-			this.render();
 		}
 
 		destroy() {
@@ -101,7 +95,7 @@ import { getCSSIcon } from 'components/icons';
 			if (action == 'modify'
 					&& this._item
 					&& (ids.includes(this._item.id) || this._linkedItems.some(item => ids.includes(item.id)))) {
-				this.render();
+				this.render(true);
 			}
 		}
 		
@@ -238,21 +232,40 @@ import { getCSSIcon } from 'components/icons';
 			return row;
 		}
 		
-		async _updateLinkedItems() {
-			this._linkedItems = (await Promise.all(Zotero.Libraries.getAll()
-					.filter(lib => lib.libraryID !== this._item.libraryID)
-					.map(lib => this._item.getLinkedItem(lib.libraryID, true))))
-				.filter(Boolean);
-			this.render();
-		}
-		
-		render() {
+		render(force = false) {
 			if (!this._item) {
 				return;
 			}
 
+			if (!force && this._isAlreadyRendered()) return;
+
 			this._body.replaceChildren();
-			for (let item of [this._item, ...this._linkedItems]) {
+			
+			for (let item of [this._item]) {
+				this._addObject(Zotero.Libraries.get(item.libraryID), item);
+				for (let collection of Zotero.Collections.get(item.getCollections())) {
+					this._addObject(collection, item);
+				}
+			}
+			if (force) {
+				this.secondaryRender();
+			}
+		}
+
+		async secondaryRender() {
+			if (!this._item) {
+				return;
+			}
+			// Skip if already rendered
+			if (this._linkedItems.length > 0) {
+				return;
+			}
+
+			this._linkedItems = (await Promise.all(Zotero.Libraries.getAll()
+					.filter(lib => lib.libraryID !== this._item.libraryID)
+					.map(lib => this._item.getLinkedItem(lib.libraryID, true))))
+				.filter(Boolean);
+			for (let item of this._linkedItems) {
 				this._addObject(Zotero.Libraries.get(item.libraryID), item);
 				for (let collection of Zotero.Collections.get(item.getCollections())) {
 					this._addObject(collection, item);

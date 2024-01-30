@@ -25,7 +25,7 @@
 
 
 {
-	class AttachmentPreviewBox extends XULElementBase {
+	class AttachmentPreviewBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-preview" data-pane="attachment-preview">
 				<html:div class="body">

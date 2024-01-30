@@ -28,22 +28,17 @@
 import { getCSSItemTypeIcon } from 'components/icons';
 
 {
-	class NotesBox extends XULElementBase {
+	class NotesBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-notes" data-pane="notes" extra-buttons="add">
 				<html:div class="body"/>
 			</collapsible-section>
 		`);
 		
-		constructor() {
-			super();
-
+		init() {
 			this._mode = 'view';
 			this._item = null;
 			this._noteIDs = [];
-		}
-		
-		init() {
 			this._section = this.querySelector('collapsible-section');
 			this._section.addEventListener('add', this._handleAdd);
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'notesBox');
@@ -86,19 +81,19 @@ import { getCSSItemTypeIcon } from 'components/icons';
 				return;
 			}
 			this._item = val;
-			this._refresh();
 		}
 
-		notify(event, type, ids, extraData) {
+		notify(event, type, ids, _extraData) {
 			if (['modify', 'delete'].includes(event) && ids.some(id => this._noteIDs.includes(id))) {
-				this._refresh();
+				this.render(true);
 			}
 		}
 
-		_refresh() {
+		render(force = false) {
 			if (!this._item) {
 				return;
 			}
+			if (!force && this._isAlreadyRendered()) return;
 
 			this._noteIDs = this._item.getNotes();
 

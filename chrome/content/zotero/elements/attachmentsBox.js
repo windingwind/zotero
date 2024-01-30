@@ -26,7 +26,7 @@
 "use strict";
 
 {
-	class AttachmentsBox extends XULElementBase {
+	class AttachmentsBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachments" data-pane="attachments" extra-buttons="add">
 				<html:div class="body">
@@ -52,14 +52,12 @@
 		}
 
 		set item(item) {
-			let isRegularItem = item?.isRegularItem();
-			this.hidden = !isRegularItem;
-			if (!isRegularItem || this._item === item) {
+			if (this._item === item) {
 				return;
 			}
 			
 			this._item = item;
-			this.refresh();
+			this._updateHidden();
 		}
 
 		get mode() {
@@ -88,11 +86,22 @@
 			this.updateCount();
 		}
 
+		get tabType() {
+			return this._tabType;
+		}
+
+		set tabType(tabType) {
+			this._tabType = tabType;
+			this._updateHidden();
+		}
+
 		get usePreview() {
+			if (this.tabType == "reader") return false;
 			return this.hasAttribute('data-use-preview');
 		}
 
 		set usePreview(val) {
+			if (this.tabType == "reader") return;
 			this.toggleAttribute('data-use-preview', val);
 			this.updatePreview();
 		}
@@ -180,8 +189,9 @@
 			return row;
 		}
 
-		async refresh() {
+		async render(force = false) {
 			if (!this._item) return;
+			if (!force && this._isAlreadyRendered()) return;
 			
 			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 
@@ -206,11 +216,8 @@
 				return;
 			}
 			let attachment = await this._item.getBestAttachment();
-			if (!this._preview.hasPreview) {
-				this._preview.setItemAndRender(attachment);
-				return;
-			}
 			this._preview.item = attachment;
+			await this._preview.render();
 		}
 
 		_handleAdd = (event) => {
@@ -232,6 +239,7 @@
 		};
 
 		_handleContextMenu = () => {
+			if (this.tabType == "reader") return;
 			let contextMenu = this._section._contextMenu;
 			let menu = document.createXULElement("menuitem");
 			menu.classList.add('menuitem-iconic', 'zotero-menuitem-toggle-preview');
@@ -263,6 +271,10 @@
 				sortedAttachmentIDs = allAttachmentIDs;
 			}
 			this._attachmentIDs = sortedAttachmentIDs;
+		}
+
+		_updateHidden() {
+			this.hidden = !this._item?.isRegularItem();
 		}
 	}
 	customElements.define("attachments-box", AttachmentsBox);
