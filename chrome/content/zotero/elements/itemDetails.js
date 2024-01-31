@@ -78,6 +78,17 @@
 			this._item = item;
 		}
 
+		/*
+		 * For contextPane update
+		 */
+		get parentID() {
+			return this._cachedParentID;
+		}
+
+		set parentID(parentID) {
+			this._cachedParentID = parentID;
+		}
+
 		get mode() {
 			return this._mode;
 		}
