@@ -42,18 +42,14 @@ import { getCSSIcon } from 'components/icons';
 			</popupset>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 
-		_item = null;
-		
 		_linkedItems = [];
-
-		_mode = null;
 
 		get item() {
 			return this._item;
 		}
 
 		set item(item) {
-			if (item?.isRegularItem()) {
+			if (item?.isRegularItem() && !item?.isFeedItem) {
 				this.hidden = false;
 			}
 			else {
@@ -62,15 +58,6 @@ import { getCSSIcon } from 'components/icons';
 			}
 			this._item = item;
 			this._linkedItems = [];
-		}
-
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(mode) {
-			this._mode = mode;
-			this.setAttribute('mode', mode);
 		}
 
 		init() {
@@ -248,14 +235,15 @@ import { getCSSIcon } from 'components/icons';
 				}
 			}
 			if (force) {
-				this.secondaryRender();
+				this.secondaryRender(true);
 			}
 		}
 
-		async secondaryRender() {
+		async secondaryRender(force = false) {
 			if (!this._item) {
 				return;
 			}
+			if (!force && this._isAlreadyRendered("secondary")) return;
 			// Skip if already rendered
 			if (this._linkedItems.length > 0) {
 				return;

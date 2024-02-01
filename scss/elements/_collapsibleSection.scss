@@ -61,17 +61,9 @@ collapsible-section {
 		
 		toolbarbutton.add {
 			@include svgicon-menu("plus", "universal", "16");
-			
-			&:hover {
-				background: var(--fill-quinary);
-			}
-			
-			&:active {
-				background: var(--fill-quarternary);
-			}
 		}
 
-		toolbarbutton.twisty .toolbarbutton-icon {
+		toolbarbutton.twisty {
 			@include svgicon-menu("chevron-12", "universal", "16");
 			transform: rotate(0deg);
 			transform-origin: center;
@@ -84,7 +76,7 @@ collapsible-section {
 	}
 	
 	&[open]:not([empty]) > .head {
-		toolbarbutton.twisty .toolbarbutton-icon {
+		toolbarbutton.twisty {
 			transform: rotate(-180deg);
 		}
 		

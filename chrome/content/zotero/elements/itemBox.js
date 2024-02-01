@@ -41,8 +41,6 @@
 			this.eventHandlers = [];
 			this.itemTypeMenu = null;
 			
-			this.showInFeeds = true;
-			
 			this._mode = 'view';
 			this._visibleFields = [];
 			this._hiddenFields = [];
@@ -475,9 +473,11 @@
 				Zotero.debug('No item to refresh', 2);
 				return;
 			}
-			if (!force && this._isAlreadyRendered()) return;
-			
+
+			// Always update retraction status
 			this.updateRetracted();
+
+			if (!force && this._isAlreadyRendered()) return;
 
 			// Init tab index to begin after all creator rows
 			this._ztabindex = this._tabIndexMinCreators * (this.item.numCreators() || 1);

@@ -208,7 +208,7 @@
 			if (attachment) {
 				this._selectNotesContext(attachment.libraryID);
 				let notesContext = this._getNotesContext(attachment.libraryID);
-				notesContext.updateFromCache();
+				notesContext.updateNotesListFromCache();
 			}
 
 			let currentNoteContext = this._getCurrentNotesContext();
@@ -262,16 +262,18 @@
 		}
 
 		_removeItemContext(tabID) {
-			this._itemPaneDeck.querySelector(`[data-tab-id="${tabID}"]`).remove();
+			this._itemPaneDeck.querySelector(`[data-tab-id="${tabID}"]`)?.remove();
 		}
 	
 		_selectItemContext(tabID) {
-			let previousPinnedPane = this._sidenav.container?.pinnedPane || "";
+			let previousContainer = this._sidenav.container;
 			let selectedPanel = this._getItemContext(tabID);
 			if (selectedPanel) {
 				this._itemPaneDeck.selectedPanel = selectedPanel;
 				selectedPanel.sidenav = this._sidenav;
-				if (previousPinnedPane) selectedPanel.pinnedPane = previousPinnedPane;
+				// Inherits previous pinned states
+				if (previousContainer) selectedPanel.pinnedPane = previousContainer.pinnedPane;
+				selectedPanel.render();
 			}
 		}
 	

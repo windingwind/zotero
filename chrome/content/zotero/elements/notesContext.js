@@ -124,8 +124,6 @@
 
 		affectedIDs = new Set();
 
-		updateFromCache = () => this._updateNotesList(true);
-		
 		init() {
 			this.node = this.querySelector(".context-node");
 			this.editor = this.querySelector(".zotero-context-pane-pinned-note");
@@ -239,14 +237,14 @@
 			let splitter = ZoteroContextPane.getSplitter();
 			
 			return Zotero_Tabs.selectedID != 'zotero-pane'
-				&& ZoteroContextPane.viewType == "notes"
+				&& ZoteroContextPane.context.viewType == "notes"
 				&& this.viewType == "notesList"
 				&& splitter.getAttribute('state') != 'collapsed';
 		}
 
 		_getCurrentEditor() {
 			let splitter = ZoteroContextPane.getSplitter();
-			if (splitter.getAttribute('state') == 'collapsed' || ZoteroContextPane.viewType != "notes") return null;
+			if (splitter.getAttribute('state') == 'collapsed' || ZoteroContextPane.context.viewType != "notes") return null;
 			return this.node.selectedPanel.querySelector('note-editor');
 		}
 
@@ -313,7 +311,7 @@
 			returnBtn.addEventListener("command", () => {
 				// Immediately save note content before vbox with note-editor iframe is destroyed below
 				editor.saveSync();
-				ZoteroContextPane.viewType = "notes";
+				ZoteroContextPane.context.viewType = "notes";
 				this.viewType = "notesList";
 				vbox?.remove();
 				ZoteroContextPane.updateAddToNote();
@@ -325,6 +323,10 @@
 			container.append(returnBtn, title);
 			parentTitleContainer.replaceChildren(container);
 			ZoteroContextPane.updateAddToNote();
+		}
+
+		updateNotesListFromCache() {
+			this._updateNotesList(true);
 		}
 
 		async _updateNotesList(useCached) {
@@ -417,7 +419,7 @@
 		}
 
 		_cacheViewType() {
-			if (ZoteroContextPane.viewType == "notes"
+			if (ZoteroContextPane.context.viewType == "notes"
 				&& this.viewType != "childNote" && !this._preventViewTypeCache) {
 				this._cachedViewType = this.viewType;
 			}
@@ -425,8 +427,7 @@
 		}
 
 		_restoreViewType() {
-			if (!this._cachedViewType) return;
-			this.viewType = this._cachedViewType;
+			this.viewType = this._cachedViewType || "notesList";
 			this._cachedViewType = "";
 		}
 

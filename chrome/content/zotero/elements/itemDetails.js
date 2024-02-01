@@ -24,8 +24,6 @@
 */
 
 {
-	const AsyncFunction = (async () => {}).constructor;
-
 	const waitFrame = async () => {
 		return Promise.race([
 			new Promise((resolve) => {
@@ -56,9 +54,9 @@
 
 						<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" data-pane="notes"/>
 
-						<attachment-box id="zotero-attachment-box" flex="1" data-pane="attachment-info" data-use-preview="true" hidden="true"/>
+						<attachment-box id="zotero-attachment-box" flex="1" data-pane="attachment-info" data-use-preview="true"/>
 						
-						<attachment-annotations-box id="zotero-editpane-attachment-annotations" flex="1" data-pane="attachment-annotations" hidden="true"/>
+						<attachment-annotations-box id="zotero-editpane-attachment-annotations" flex="1" data-pane="attachment-annotations"/>
 						
 						<libraries-collections-box id="zotero-editpane-libraries-collections" class="zotero-editpane-libraries-collections" data-pane="libraries-collections"/>
 
@@ -102,12 +100,12 @@
 		}
 		
 		set pinnedPane(val) {
-			if (!val || !this.getPane(val)) {
+			if (!val || !this.getEnabledPane(val)) {
 				val = '';
 			}
 			this.setAttribute('pinnedPane', val);
 			if (val) {
-				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getPane(val));
+				this._pinnedPaneMinScrollHeight = this._getMinScrollHeightForPane(this.getEnabledPane(val));
 			}
 			this.sidenav.updatePaneStatus(val);
 		}
@@ -174,10 +172,12 @@
 			});
 			this._initIntersectionObserver();
 
-			this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'ItemDetails');
+			this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'itempane'], 'ItemDetails');
 
 			this._disableScrollHandler = false;
 			this._pinnedPaneMinScrollHeight = 0;
+
+			this._lastUpdateCustomSection = 0;
 		}
 
 		destroy() {
@@ -198,38 +198,20 @@
 			Zotero.debug('Viewing item');
 			this._isRendering = true;
 
+			this.renderCustomSections();
+
 			let panes = this.getPanes();
 			let pendingBoxes = [];
 			let inTrash = ZoteroPane.collectionsView.selectedTreeRow && ZoteroPane.collectionsView.selectedTreeRow.isTrash();
 			let tabType = Zotero_Tabs.selectedType;
 			for (let box of [this._header, ...panes]) {
-				if (!box.showInFeeds && item.isFeedItem) {
-					box.style.display = 'none';
-					box.hidden = true;
-					continue;
-				}
-				else {
-					box.style.display = '';
-					box.hidden = false;
-				}
-				
-				if (this.mode) {
-					box.mode = this.mode;
-					
-					if (box.mode == 'view') {
-						box.hideEmptyFields = true;
-					}
-				}
-				else {
-					box.mode = 'edit';
-				}
-				
+				box.mode = this.mode || "edit";
 				box.item = item;
 				box.inTrash = inTrash;
 				box.tabType = tabType;
 				// Render sync boxes immediately
 				if (!box.hidden && box.render) {
-					if (box.render instanceof AsyncFunction) {
+					if (box.render.constructor.name == "AsyncFunction") {
 						pendingBoxes.push(box);
 					}
 					else {
@@ -238,7 +220,7 @@
 				}
 			}
 
-			let pinnedPaneElem = this.getPane(this.pinnedPane);
+			let pinnedPaneElem = this.getEnabledPane(this.pinnedPane);
 			let pinnedIndex = panes.indexOf(pinnedPaneElem);
 			
 			this._paneParent.style.paddingBottom = '';
@@ -270,7 +252,7 @@
 				if (pinnedIndex > -1 && panes.indexOf(box) < pinnedIndex) {
 					continue;
 				}
-				if (this.isPaneVisible(box.dataset.pane)) {
+				if (!this.isPaneVisible(box.dataset.pane)) {
 					continue;
 				}
 				await box.secondaryRender();
@@ -280,17 +262,70 @@
 			}
 		}
 
+		renderCustomSections() {
+			let lastUpdate = Zotero.ItemPaneManager.getUpdateTime();
+			if (this._lastUpdateCustomSection == lastUpdate) return;
+			this._lastUpdateCustomSection = lastUpdate;
+
+			let targetPanes = Zotero.ItemPaneManager.getCustomSections();
+			let currentPaneElements = this.getCustomPanes();
+			// Remove
+			for (let elem of currentPaneElements) {
+				let elemPaneID = elem.dataset.pane;
+				if (targetPanes.find(pane => pane.paneID == elemPaneID)) continue;
+				this._intersectionOb.unobserve(elem);
+				elem.remove();
+				this.sidenav.removePane(elemPaneID);
+			}
+			// Create
+			let currentPaneIDs = currentPaneElements.map(elem => elem.dataset.pane);
+			for (let section of targetPanes) {
+				let { paneID, head, sidenav, fragment,
+					onInit, onDestroy, onDataChange, onRender, onSecondaryRender, onToggle,
+					sectionButtons } = Components.utils.cloneInto(section, window, { wrapReflectors: true, cloneFunctions: true });
+				if (currentPaneIDs.includes(paneID)) continue;
+				let elem = new (customElements.get("item-pane-custom-section"));
+				elem.dataset.sidenavOptions = JSON.stringify(sidenav || {});
+				elem.paneID = paneID;
+				elem.fragment = fragment;
+				elem.registerSectionIcon({ icon: head.icon, darkIcon: head.darkIcon });
+				elem.registerHook({ type: "init", callback: onInit });
+				elem.registerHook({ type: "destroy", callback: onDestroy });
+				elem.registerHook({ type: "dataChange", callback: onDataChange });
+				elem.registerHook({ type: "render", callback: onRender });
+				elem.registerHook({ type: "secondaryRender", callback: onSecondaryRender });
+				elem.registerHook({ type: "toggle", callback: onToggle });
+				if (sectionButtons) {
+					for (let buttonOptions of sectionButtons) {
+						elem.registerSectionButton(buttonOptions);
+					}
+				}
+				this._paneParent.append(elem);
+				elem.setL10nID(head.l10nID);
+				elem.setL10nArgs(head.l10nArgs);
+				this._intersectionOb.observe(elem);
+				this.sidenav.addPane(paneID);
+			}
+		}
+
 		renderCustomHead(callback) {
 			this._header.renderCustomHead(callback);
 		}
 
-		notify = async (action, _type, _ids, _extraData) => {
+		notify = async (action, type, _ids, _extraData) => {
 			if (action == 'refresh' && this.item) {
+				if (type == 'item-pane') {
+					this.renderCustomSections();
+				}
 				await this.render();
 			}
 		};
 
 		getPane(id) {
+			return this._paneParent.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]`);
+		}
+
+		getEnabledPane(id) {
 			return this._paneParent.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]:not([hidden])`);
 		}
 
@@ -317,8 +352,12 @@
 			return visiblePanes;
 		}
 
+		getCustomPanes() {
+			return Array.from(this._paneParent.querySelectorAll(':scope > item-pane-custom-section[data-pane]'));
+		}
+
 		isPaneVisible(paneID) {
-			let paneElem = this.getPane(paneID);
+			let paneElem = this.getEnabledPane(paneID);
 			if (!paneElem) return false;
 			const rect = paneElem.getBoundingClientRect();
 			// Sample per 20 px
@@ -342,7 +381,7 @@
 		}
 
 		async scrollToPane(paneID, behavior = 'smooth') {
-			let pane = this.getPane(paneID);
+			let pane = this.getEnabledPane(paneID);
 			if (!pane) return null;
 
 			let scrollPromise;
@@ -444,7 +483,7 @@
 				// Ignore overscroll (which generates scroll events on Windows 11, unlike on macOS)
 				// and don't shrink below the pinned pane's min scroll height
 				if (newMinScrollHeight > this._paneParent.scrollHeight
-						|| this.getPane(this.pinnedPane) && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
+						|| this.getEnabledPane(this.pinnedPane) && newMinScrollHeight < this._pinnedPaneMinScrollHeight) {
 					return;
 				}
 				this._minScrollHeight = newMinScrollHeight;
@@ -459,7 +498,7 @@
 			};
 			// Tab from the scrollable area focuses the pinned pane if it exists
 			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && this.pinnedPane) {
-				let pane = this.getPane(this.pinnedPane);
+				let pane = this.getEnabledPane(this.pinnedPane);
 				pane.firstChild._head.focus();
 				stopEvent();
 				return;

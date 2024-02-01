@@ -35,12 +35,6 @@
 			</collapsible-section>
 		`);
 		
-		showInFeeds = true;
-
-		_item = null;
-
-		_mode = null;
-
 		get item() {
 			return this._item;
 		}

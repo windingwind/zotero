@@ -49,31 +49,12 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 		
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-				case 'edit':
-					break;
-					
-				default:
-					throw new Error(`Invalid mode '${val}'`);
-			}
-			this.setAttribute('mode', val);
-			this._mode = val;
-		}
-
 		get item() {
 			return this._item;
 		}
 
 		set item(val) {
-			if (val?.isRegularItem()) {
+			if (val?.isRegularItem() && !val?.isFeedItem) {
 				this.hidden = false;
 			}
 			else {

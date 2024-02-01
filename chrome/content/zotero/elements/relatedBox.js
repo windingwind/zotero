@@ -48,30 +48,12 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this._section = null;
 		}
 		
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(val) {
-			switch (val) {
-				case 'view':
-				case 'merge':
-				case 'mergeedit':
-				case 'edit':
-					break;
-					
-				default:
-					throw new Error(`Invalid mode '${val}'`);
-			}
-			this.setAttribute('mode', val);
-			this._mode = val;
-		}
-
 		get item() {
 			return this._item;
 		}
 
 		set item(val) {
+			this.hidden = val?.isFeedItem;
 			this._item = val;
 		}
 

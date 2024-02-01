@@ -296,6 +296,9 @@
 		}
 
 		async render(force = false) {
+			if (!this.item) {
+				return;
+			}
 			if (this._isRendering) {
 				return;
 			}

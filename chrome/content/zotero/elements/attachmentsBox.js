@@ -37,13 +37,7 @@
 			<popupset/>
 		`);
 
-		_item = null;
-		
 		_attachmentIDs = [];
-
-		_mode = null;
-		
-		_inTrash = false;
 
 		_preview = null;
 
@@ -57,15 +51,7 @@
 			}
 			
 			this._item = item;
-			this._updateHidden();
-		}
-
-		get mode() {
-			return this._mode;
-		}
-
-		set mode(mode) {
-			this._mode = mode;
+			this.hidden = !item?.isRegularItem() || item?.isFeedItem;
 		}
 		
 		get inTrash() {
@@ -84,15 +70,6 @@
 				this._updateRowAttributes(row, row.attachment);
 			}
 			this.updateCount();
-		}
-
-		get tabType() {
-			return this._tabType;
-		}
-
-		set tabType(tabType) {
-			this._tabType = tabType;
-			this._updateHidden();
 		}
 
 		get usePreview() {
@@ -271,10 +248,6 @@
 				sortedAttachmentIDs = allAttachmentIDs;
 			}
 			this._attachmentIDs = sortedAttachmentIDs;
-		}
-
-		_updateHidden() {
-			this.hidden = !this._item?.isRegularItem();
 		}
 	}
 	customElements.define("attachments-box", AttachmentsBox);

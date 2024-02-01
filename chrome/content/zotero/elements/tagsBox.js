@@ -125,6 +125,7 @@
 		}
 
 		set item(val) {
+			this.hidden = val?.isFeedItem;
 			// Don't reload if item hasn't changed
 			if (this._item == val) {
 				return;
