@@ -25,18 +25,22 @@
 
 {
 	const waitFrame = async () => {
-		return Promise.race([
-			new Promise((resolve) => {
-				requestAnimationFrame(resolve);
-			}),
-			Zotero.Promise.delay(30)
-		]);
+		return waitNoLongerThan(new Promise((resolve) => {
+			requestAnimationFrame(resolve);
+		}), 30);
 	};
 	
 	const waitFrames = async (n) => {
 		for (let i = 0; i < n; i++) {
 			await waitFrame();
 		}
+	};
+
+	const waitNoLongerThan = async (promise, ms = 1000) => {
+		return Promise.race([
+			promise,
+			Zotero.Promise.delay(ms)
+		]);
 	};
 
 	class ItemDetails extends XULElementBase {
@@ -224,6 +228,8 @@
 			let pinnedIndex = panes.indexOf(pinnedPaneElem);
 			
 			this._paneParent.style.paddingBottom = '';
+			// Wait for the boxes to update `hidden` state.
+			// Test case: pin tags section and switch between attachment and regular item
 			await waitFrames(3);
 			if (pinnedPaneElem) {
 				let paneID = pinnedPaneElem.dataset.pane;
@@ -242,7 +248,7 @@
 				if (!this.isPaneVisible(box.dataset.pane)) {
 					continue;
 				}
-				await box.render();
+				await waitNoLongerThan(box.render(), 500);
 			}
 			// After all panes finish first rendering, try secondary rendering
 			for (let box of panes) {
@@ -255,7 +261,7 @@
 				if (!this.isPaneVisible(box.dataset.pane)) {
 					continue;
 				}
-				await box.secondaryRender();
+				await waitNoLongerThan(box.secondaryRender(), 500);
 			}
 			if (this.item.id == item.id) {
 				this._isRendering = false;
@@ -359,25 +365,12 @@
 		isPaneVisible(paneID) {
 			let paneElem = this.getEnabledPane(paneID);
 			if (!paneElem) return false;
-			const rect = paneElem.getBoundingClientRect();
-			// Sample per 20 px
-			const samplePeriod = 20;
-			let x = rect.left + rect.width / 2;
-			let yStart = rect.top;
-			let yEnd = rect.bottom;
-			let elAtPos;
-			// Check visibility from top/bottom to center
-			for (let dy = 1; dy < Math.floor((yEnd - yStart) / 2); dy += samplePeriod) {
-				elAtPos = document.elementFromPoint(x, yStart + dy);
-				if (paneElem.contains(elAtPos)) {
-					return true;
-				}
-				elAtPos = document.elementFromPoint(x, yEnd - dy);
-				if (paneElem.contains(elAtPos)) {
-					return true;
-				}
+			let paneRect = paneElem.getBoundingClientRect();
+			let containerRect = this._paneParent.getBoundingClientRect();
+			if (paneRect.top >= containerRect.bottom || paneRect.bottom <= containerRect.top) {
+				return false;
 			}
-			return false;
+			return true;
 		}
 
 		async scrollToPane(paneID, behavior = 'smooth') {
