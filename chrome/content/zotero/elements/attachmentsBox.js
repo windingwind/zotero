@@ -51,7 +51,9 @@
 			}
 			
 			this._item = item;
-			this.hidden = !item?.isRegularItem() || item?.isFeedItem;
+			let hidden = !item?.isRegularItem() || item?.isFeedItem;
+			this.hidden = hidden;
+			this._preview.disableResize = !!hidden;
 		}
 		
 		get inTrash() {

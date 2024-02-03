@@ -201,9 +201,11 @@
 			if (val.isAttachment()) {
 				this._item = val;
 				this.hidden = false;
+				this._preview.disableResize = false;
 			}
 			else {
 				this.hidden = true;
+				this._preview.disableResize = true;
 			}
 		}
 

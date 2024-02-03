@@ -228,9 +228,6 @@
 			let pinnedIndex = panes.indexOf(pinnedPaneElem);
 			
 			this._paneParent.style.paddingBottom = '';
-			// Wait for the boxes to update `hidden` state.
-			// Test case: pin tags section and switch between attachment and regular item
-			await waitFrames(3);
 			if (pinnedPaneElem) {
 				let paneID = pinnedPaneElem.dataset.pane;
 				this.scrollToPane(paneID, 'instant');
@@ -288,7 +285,7 @@
 			for (let section of targetPanes) {
 				let { paneID, head, sidenav, fragment,
 					onInit, onDestroy, onDataChange, onRender, onSecondaryRender, onToggle,
-					sectionButtons } = Components.utils.cloneInto(section, window, { wrapReflectors: true, cloneFunctions: true });
+					sectionButtons } = section;
 				if (currentPaneIDs.includes(paneID)) continue;
 				let elem = new (customElements.get("item-pane-custom-section"));
 				elem.dataset.sidenavOptions = JSON.stringify(sidenav || {});

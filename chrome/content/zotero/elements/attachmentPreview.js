@@ -131,7 +131,16 @@
 		}
 
 		get hasPreview() {
-			return this.getAttribute("data-preview-status") === "success";
+			return this.dataset.previewStatus === "success";
+		}
+
+		get disableResize() {
+			return this.dataset.disableResize !== "false";
+		}
+
+		set disableResize(val) {
+			this.dataset.disableResize = val ? "true" : "false";
+			this._handleResize();
 		}
 
 		setPreviewStatus(val) {
@@ -369,6 +378,7 @@
 		}
 
 		_handleResize() {
+			if (this.disableResize) return;
 			this.style.setProperty("--preview-width", `${this.clientWidth}px`);
 		}
 
