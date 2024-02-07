@@ -49,7 +49,7 @@
 				<html:div class="zotero-view-item-main">
 					<pane-header id="zotero-item-pane-header" />
 					
-					<html:div id="zotero-view-item" class="zotero-view-item">
+					<html:div id="zotero-view-item" class="zotero-view-item" tabindex="0">
 						<item-box id="zotero-editpane-item-box" data-pane="info"/>
 						
 						<abstract-box id="zotero-editpane-abstract" class="zotero-editpane-abstract" data-pane="abstract"/>
@@ -486,21 +486,28 @@
 				event.preventDefault();
 				event.stopPropagation();
 			};
+			let isLibraryTab = Zotero_Tabs.selectedIndex == 0;
+			let sidenav = document.getElementById(
+				isLibraryTab ? 'zotero-view-item-sidenav' : 'zotero-context-pane-sidenav'
+			);
+
+			// Shift-tab from title when reader is opened focuses the last button in tabs toolbar
+			if (event.target.closest(".title") && event.key == "Tab"
+				&& event.shiftKey && Zotero_Tabs.selectedType == "reader") {
+				let focusable = [...document.querySelectorAll("#zotero-tabs-toolbar toolbarbutton:not([disabled]):not([hidden])")];
+				let btn = focusable[focusable.length - 1];
+				btn.focus();
+				stopEvent();
+				return;
+			}
 			// Tab from the scrollable area focuses the pinned pane if it exists
-			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && this.pinnedPane) {
-				let pane = this.getEnabledPane(this.pinnedPane);
+			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && sidenav.pinnedPane) {
+				let pane = sidenav.getPane(sidenav.pinnedPane);
 				pane.firstChild._head.focus();
 				stopEvent();
 				return;
 			}
-			// Space or Enter on a button or 'keyboard-clickable' triggers a click
-			if ([" ", "Enter"].includes(event.key)
-				&& (event.target.tagName == "toolbarbutton"
-					|| event.target.classList.contains("keyboard-clickable"))) {
-				event.target.click();
-				stopEvent();
-			}
-			// Tab navigation between entries and buttons within library, related and notes boxes
+			// Tab tavigation between entries and buttons within library, related and notes boxes
 			if (event.key == "Tab" && event.target.closest(".box")) {
 				let next = null;
 				if (event.key == "Tab" && !event.shiftKey) {

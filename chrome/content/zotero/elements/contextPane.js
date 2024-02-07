@@ -313,12 +313,11 @@
 	
 		_focus() {
 			let splitter = ZoteroContextPane.getSplitter();
-			let node;
 	
 			if (splitter.getAttribute('state') != 'collapsed') {
 				if (this.viewType == "item") {
-					node = this._itemPaneDeck.selectedPanel;
-					node.focus();
+					let header = this._itemPaneDeck.selectedPanel.querySelector("pane-header editable-text");
+					header.focus();
 					return true;
 				}
 				else {
