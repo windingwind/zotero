@@ -257,7 +257,7 @@
 				}
 				
 				toolbarbutton.setAttribute('aria-selected', !contextNotesPaneVisible && pane == pinnedPane);
-				toolbarbutton.parentElement.hidden = !this.container.getEnabledPane(pane);
+				// No need to set `hidden` here, since it's updated by ItemDetails#_handlePaneStatus
 				// Set .pinned on the container, for pin styling
 				toolbarbutton.parentElement.classList.toggle('pinned', pane == pinnedPane);
 			}
