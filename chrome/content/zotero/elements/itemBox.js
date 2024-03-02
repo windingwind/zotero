@@ -103,6 +103,7 @@
 		}
 		
 		init() {
+			this.initCollapsibleSection();
 			this._creatorTypeMenu.addEventListener('command', async (event) => {
 				var typeBox = document.popupNode;
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -124,7 +125,7 @@
 				}
 			});
 
-			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (event) => {
+			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (_event) => {
 				var row = document.popupNode.closest('.meta-row');
 				var typeBox = row.querySelector('.creator-type-label').parentNode;
 				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
@@ -473,6 +474,7 @@
 				Zotero.debug('No item to refresh', 2);
 				return;
 			}
+			if (!this._section.open) return;
 
 			// Always update retraction status
 			this.updateRetracted();

@@ -86,7 +86,7 @@
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAdd);
 			// this._section.addEventListener('togglePreview', this._handleTogglePreview);
 
@@ -100,16 +100,11 @@
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentsBox');
 
-			this._section.addEventListener("toggle", (ev) => {
-				if (ev.target.open) {
-					this._preview.render();
-				}
-			});
-
 			this._section._contextMenu.addEventListener('popupshowing', this._handleContextMenu, { once: true });
 		}
 
 		destroy() {
+			this._section.removeEventListener('add', this._handleAdd);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 
@@ -191,7 +186,7 @@
 		}
 
 		async updatePreview() {
-			if (!this.usePreview) {
+			if (!this.usePreview || !this._section.open) {
 				return;
 			}
 			let attachment = await this._item.getBestAttachment();

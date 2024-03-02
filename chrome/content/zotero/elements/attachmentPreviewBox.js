@@ -64,19 +64,14 @@
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._preview = this.querySelector("#attachment-preview");
-
-			this._section.addEventListener("toggle", (ev) => {
-				if (ev.target.open && this.usePreview) {
-					this._preview.render();
-				}
-			});
 		}
 
 		destroy() {}
 
 		async render() {
+			if (!this._section.open) return;
 			let bestAttachment = await this.item.getBestAttachment();
 			if (bestAttachment) {
 				this._preview.item = bestAttachment;

@@ -73,12 +73,35 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		}
 	}
 
+	disconnectedCallback() {
+		super.disconnectedCallback();
+		if (this._section) {
+			this._section.removeEventListener("toggle", this._handleSectionToggle);
+			this._section = null;
+		}
+	}
+
+	initCollapsibleSection() {
+		this._section = this.querySelector('collapsible-section');
+		if (this._section) {
+			this._section.addEventListener("toggle", this._handleSectionToggle);
+		}
+	}
+
 	/**
 	 * @returns {boolean} if false, data change will not be saved
 	 */
 	_handleDataChange(_type, _value) {
 		return true;
 	}
+
+	_handleSectionToggle = async (event) => {
+		if (event.target !== this._section || !this._section.open) {
+			return;
+		}
+		if (this.render) await this.render(true);
+		if (this.secondaryRender) await this.secondaryRender(true);
+	};
 
 	/**
 	 * @param {"primary" | "secondary"} [type]

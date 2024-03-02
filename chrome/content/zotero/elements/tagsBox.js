@@ -51,7 +51,7 @@
 			this._mode = 'view';
 			this._item = null;
 
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAddButtonClick);
 			this.addEventListener('click', (event) => {
 				if (event.target === this) {
@@ -90,7 +90,7 @@
 		}
 
 		destroy() {
-			this._section = null;
+			this._section.removeEventListener('add', this._handleAddButtonClick);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 
@@ -170,9 +170,7 @@
 		}
 
 		render(force = false) {
-			if (!this.item) {
-				return;
-			}
+			if (!this.item) return;
 			if (!force && this._isAlreadyRendered()) return;
 
 			Zotero.debug('Reloading tags box');

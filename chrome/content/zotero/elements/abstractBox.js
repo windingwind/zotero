@@ -65,7 +65,7 @@
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'abstractBox');
 
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 
 			this._abstractField = this.querySelector('editable-text');
 			this._abstractField.addEventListener('change', () => this.save());
@@ -100,9 +100,7 @@
 		}
 
 		render(force = false) {
-			if (!this.item) {
-				return;
-			}
+			if (!this.item) return;
 			if (!force && this._isAlreadyRendered()) return;
 
 			let abstract = this.item.getField('abstractNote');

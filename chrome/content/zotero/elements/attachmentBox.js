@@ -210,7 +210,7 @@
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 
 			this._id('url').addEventListener('contextmenu', (event) => {
 				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
@@ -239,12 +239,6 @@
 			});
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
-
-			this._section.addEventListener("toggle", (ev) => {
-				if (ev.target.open && this.usePreview) {
-					this._preview.render();
-				}
-			});
 
 			// Work around the reindex toolbarbutton not wanting to properly receive focus on tab.
 			// Make <image> focusable. On focus of the image, bounce the focus to the toolbarbutton.
@@ -298,12 +292,9 @@
 		}
 
 		async render(force = false) {
-			if (!this.item) {
-				return;
-			}
-			if (this._isRendering) {
-				return;
-			}
+			if (!this.item) return;
+			if (this._isRendering) return;
+			if (!this._section.open) return;
 			if (!force && this._isAlreadyRendered()) return;
 
 			Zotero.debug('Refreshing attachment box');

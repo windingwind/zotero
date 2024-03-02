@@ -51,14 +51,12 @@
 		}
 
 		init() {
-			this._section = this.querySelector('collapsible-section');
-			this._section.addEventListener("toggle", this._handleSectionOpen);
+			this.initCollapsibleSection();
+
 			this._body = this.querySelector('.body');
 		}
 
-		destroy() {
-			this._section.removeEventListener("toggle", this._handleSectionOpen);
-		}
+		destroy() {}
 
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
@@ -68,7 +66,6 @@
 
 		render(force = false) {
 			if (!this.initialized || !this.item?.isFileAttachment()) return;
-
 			if (!force && this._isAlreadyRendered()) return;
 
 			let annotations = this.item.getAnnotations();
@@ -93,13 +90,6 @@
 				this._body.append(row);
 			}
 		}
-
-		_handleSectionOpen = (event) => {
-			if (event.target !== this._section || !this._section.open) {
-				return;
-			}
-			this.render();
-		};
 
 		_updateHidden() {
 			this.hidden = !this.item?.isFileAttachment() || this.tabType == "reader";

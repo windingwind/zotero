@@ -63,19 +63,13 @@ import { getCSSIcon } from 'components/icons';
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'librariesCollectionsBox');
 			this._body = this.querySelector('.body');
-			this._section = this.querySelector('collapsible-section');
-			this._section.addEventListener('add', (event) => {
-				this.querySelector('.add-popup').openPopupAtScreen(
-					event.detail.button.screenX,
-					event.detail.button.screenY,
-					true
-				);
-				this._section.open = true;
-			});
+			this.initCollapsibleSection();
+			this._section.addEventListener('add', this._handleAdd);
 		}
 
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+			this._section.removeEventListener('add', this._handleAdd);
 		}
 
 		notify(action, type, ids) {
@@ -220,10 +214,8 @@ import { getCSSIcon } from 'components/icons';
 		}
 		
 		render(force = false) {
-			if (!this._item) {
-				return;
-			}
-
+			if (!this._item) return;
+			if (!this._section.open) return;
 			if (!force && this._isAlreadyRendered()) return;
 
 			this._body.replaceChildren();
@@ -260,6 +252,15 @@ import { getCSSIcon } from 'components/icons';
 				}
 			}
 		}
+
+		_handleAdd = (event) => {
+			this.querySelector('.add-popup').openPopupAtScreen(
+				event.detail.button.screenX,
+				event.detail.button.screenY,
+				true
+			);
+			this._section.open = true;
+		};
 	}
 	customElements.define("libraries-collections-box", LibrariesCollectionsBox);
 }

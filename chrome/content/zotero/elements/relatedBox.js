@@ -39,13 +39,13 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this._mode = 'view';
 			this._item = null;
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
-			this._section = this.querySelector('collapsible-section');
+			this.initCollapsibleSection();
 			this._section.addEventListener('add', this.add);
 		}
 		
 		destroy() {
+			this._section.removeEventListener('add', this.add);
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-			this._section = null;
 		}
 		
 		get item() {
