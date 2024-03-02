@@ -124,7 +124,8 @@
 		}
 
 		_handleTabAdd(action, type, ids, extraData) {
-			this._addItemContext(ids[0], extraData[ids[0]].itemID);
+			let data = extraData[ids[0]];
+			this._addItemContext(ids[0], data.itemID, data.type);
 		}
 
 		_handleTabClose(action, type, ids) {
@@ -277,7 +278,7 @@
 			}
 		}
 	
-		async _addItemContext(tabID, itemID) {
+		async _addItemContext(tabID, itemID, tabType = "") {
 			let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 			let library = Zotero.Libraries.get(libraryID);
 			await library.waitForDataLoad('item');
@@ -307,8 +308,11 @@
 			itemDetails.sidenav = this._sidenav;
 			if (previousPinnedPane) itemDetails.pinnedPane = previousPinnedPane;
 	
-			this._selectItemContext(tabID);
-			await itemDetails.render();
+			// `unloaded` tabs are never selected and shouldn't be rendered on creation.
+			// Use `includes` here for forward compatibility.
+			if (!tabType.includes("unloaded")) {
+				this._selectItemContext(tabID);
+			}
 		}
 	
 		_focus() {
