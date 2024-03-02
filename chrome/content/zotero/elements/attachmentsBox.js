@@ -75,12 +75,10 @@
 		}
 
 		get usePreview() {
-			if (this.tabType == "reader") return false;
 			return this.hasAttribute('data-use-preview');
 		}
 
 		set usePreview(val) {
-			if (this.tabType == "reader") return;
 			this.toggleAttribute('data-use-preview', val);
 			this.updatePreview();
 		}
@@ -189,9 +187,23 @@
 			if (!this.usePreview || !this._section.open) {
 				return;
 			}
-			let attachment = await this._item.getBestAttachment();
+			let attachment = await this._getPreviewAttachment();
+			if (!attachment) {
+				this.toggleAttribute('data-use-preview', false);
+				return;
+			}
 			this._preview.item = attachment;
 			await this._preview.render();
+		}
+
+		async _getPreviewAttachment() {
+			let attachment = await this._item.getBestAttachment();
+			if (this.tabType === "reader"
+				&& Zotero_Tabs._getTab(Zotero_Tabs.selectedID)?.tab?.data?.itemID == attachment.id) {
+				// In the reader, only show the preview when viewing a secondary attachment
+				return null;
+			}
+			return attachment;
 		}
 
 		_handleAdd = (event) => {
@@ -212,8 +224,8 @@
 			}
 		};
 
-		_handleContextMenu = () => {
-			if (this.tabType == "reader") return;
+		_handleContextMenu = async () => {
+			if (!await this._getPreviewAttachment()) return;
 			let contextMenu = this._section._contextMenu;
 			let menu = document.createXULElement("menuitem");
 			menu.classList.add('menuitem-iconic', 'zotero-menuitem-toggle-preview');
