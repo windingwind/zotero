@@ -154,6 +154,8 @@
 		set sidenav(sidenav) {
 			this._sidenav = sidenav;
 			sidenav.container = this;
+			// Manually update once and further changes will be synced automatically to sidenav
+			this.getPanes().forEach(elem => sidenav.updatePaneStatus(elem.dataset.pane));
 		}
 
 		static get observedAttributes() {
