@@ -143,6 +143,11 @@
 			
 			this._itemDetails.mode = this.editable ? null : "view";
 			this._itemDetails.item = item;
+
+			if (this.hasAttribute("collapsed")) {
+				return true;
+			}
+
 			this._itemDetails.render();
 			
 			if (item.isFeedItem) {
