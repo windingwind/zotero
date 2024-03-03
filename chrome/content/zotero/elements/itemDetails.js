@@ -58,9 +58,9 @@
 
 						<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" data-pane="notes"/>
 
-						<attachment-box id="zotero-attachment-box" flex="1" data-pane="attachment-info" data-use-preview="true"/>
+						<attachment-box id="zotero-attachment-box" data-pane="attachment-info" data-use-preview="true" hidden="true"/>
 						
-						<attachment-annotations-box id="zotero-editpane-attachment-annotations" flex="1" data-pane="attachment-annotations"/>
+						<attachment-annotations-box id="zotero-editpane-attachment-annotations" data-pane="attachment-annotations" hidden="true"/>
 						
 						<libraries-collections-box id="zotero-editpane-libraries-collections" class="zotero-editpane-libraries-collections" data-pane="libraries-collections"/>
 
@@ -155,7 +155,7 @@
 			this._sidenav = sidenav;
 			sidenav.container = this;
 			// Manually update once and further changes will be synced automatically to sidenav
-			this.getPanes().forEach(elem => sidenav.updatePaneStatus(elem.dataset.pane));
+			this.forceUpdateSideNav();
 		}
 
 		static get observedAttributes() {
@@ -372,6 +372,10 @@
 			return true;
 		}
 
+		forceUpdateSideNav() {
+			this.getPanes().forEach(elem => this._sidenav.updatePaneStatus(elem.dataset.pane));
+		}
+
 		async scrollToPane(paneID, behavior = 'smooth') {
 			let pane = this.getEnabledPane(paneID);
 			if (!pane) return null;
@@ -380,7 +384,7 @@
 
 			// If the itemPane is collapsed, just remember which pane needs to be scrolled to
 			// when itemPane is expanded.
-			if (this._collapsed || this.getAttribute("no-render")) {
+			if (this._collapsed) {
 				return null;
 			}
 
