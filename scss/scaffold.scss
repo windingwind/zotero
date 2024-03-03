@@ -129,6 +129,7 @@ vbox > splitter {
 
 #left-tabbox {
 	margin: 5px;
+	min-width: 500px;
 }
 
 #checkboxes-translatorType checkbox {
@@ -144,6 +145,7 @@ vbox > splitter {
 	margin: -16px -16px -16px 0px;
 	border-left: var(--material-panedivider);
 	textarea {
+		flex: 1;
 		outline: none;
 		border: 0;
 	}
