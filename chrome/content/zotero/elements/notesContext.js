@@ -103,7 +103,8 @@
 			if (!(viewType in viewTypeMap)) {
 				throw new Error(`NotesContext.viewType must be one of ["notesList", "standaloneNote", "childNote"], but got ${viewType}`);
 			}
-			this.node.setAttribute("selectedIndex", viewTypeMap[viewType]);
+			// fx115: setting attribute doesn't work
+			this.node.selectedIndex = viewTypeMap[viewType];
 		}
 
 		static get observedAttributes() {

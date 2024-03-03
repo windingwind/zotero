@@ -55,7 +55,7 @@
 			if (!(viewType in viewTypeMap)) {
 				throw new Error(`ContextPane.viewType must be one of ["item", "notes"], but got ${viewType}`);
 			}
-			this._panesDeck.setAttribute("selectedIndex", viewTypeMap[viewType]);
+			this._panesDeck.selectedIndex = viewTypeMap[viewType];
 		}
 
 		init() {
