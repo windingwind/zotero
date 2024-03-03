@@ -92,30 +92,7 @@
 		 * @param {"message" | "item" | "note" | "duplicates"} type view type
 		 */
 		set viewType(type) {
-			let previousViewType = this.viewType;
-			switch (type) {
-				case "message": {
-					this._deck.selectedIndex = 0;
-					break;
-				}
-				case "item": {
-					this._deck.selectedIndex = 1;
-					break;
-				}
-				case "note": {
-					this._deck.selectedIndex = 2;
-					break;
-				}
-				case "duplicates": {
-					this._deck.selectedIndex = 3;
-					break;
-				}
-			}
-			let isViewingItem = type == "item";
-			if (previousViewType != "item" && isViewingItem) {
-				this._itemDetails.forceUpdateSideNav();
-			}
-			this._itemDetails.sidenav.toggleDefaultStatus(!isViewingItem);
+			this.setAttribute("view-type", type);
 		}
 
 		render() {
@@ -469,22 +446,27 @@
 		}
 
 		static get observedAttributes() {
-			return ['collapsed', 'width', 'height'];
+			return ['collapsed', 'width', 'height', 'view-type'];
 		}
 
-		attributeChangedCallback(name, value) {
+		attributeChangedCallback(name, oldValue, newValue) {
 			switch (name) {
 				case "collapsed": {
 					this.handleResize();
 					break;
 				}
 				case "width": {
-					this.style.width = `${value}px`;
+					this.style.width = `${newValue}px`;
 					break;
 				}
 				case "height": {
-					this.style.height = `${value}px`;
+					this.style.height = `${newValue}px`;
 					break;
+				}
+				case "view-type": {
+					if (newValue !== oldValue) {
+						this._handleViewTypeChange(newValue);
+					}
 				}
 			}
 		}
@@ -508,6 +490,33 @@
 					this._itemDetails.render();
 				}
 			}
+		}
+
+		_handleViewTypeChange(type) {
+			let previousViewType = this.viewType;
+			switch (type) {
+				case "message": {
+					this._deck.selectedIndex = 0;
+					break;
+				}
+				case "item": {
+					this._deck.selectedIndex = 1;
+					break;
+				}
+				case "note": {
+					this._deck.selectedIndex = 2;
+					break;
+				}
+				case "duplicates": {
+					this._deck.selectedIndex = 3;
+					break;
+				}
+			}
+			let isViewingItem = type == "item";
+			if (previousViewType != "item" && isViewingItem) {
+				this._itemDetails.forceUpdateSideNav();
+			}
+			this._itemDetails.sidenav.toggleDefaultStatus(!isViewingItem);
 		}
 	}
 	customElements.define("item-pane", ItemPane);
