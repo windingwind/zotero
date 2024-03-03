@@ -86,7 +86,6 @@
 		init() {
 			this.initCollapsibleSection();
 			this._section.addEventListener('add', this._handleAdd);
-			// this._section.addEventListener('togglePreview', this._handleTogglePreview);
 
 			this._attachments = this.querySelector('.attachments-container');
 			
@@ -165,8 +164,6 @@
 			if (!this._item) return;
 			if (!force && this._isAlreadyRendered()) return;
 			
-			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
-
 			await this._updateAttachmentIDs();
 
 			let itemAttachments = Zotero.Items.get(this._attachmentIDs);
@@ -176,6 +173,7 @@
 				this.addRow(attachment);
 			}
 			this.updateCount();
+			this.usePreview = Zotero.Prefs.get('showAttachmentPreview');
 		}
 		
 		updateCount() {
