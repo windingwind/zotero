@@ -92,6 +92,7 @@
 		 * @param {"message" | "item" | "note" | "duplicates"} type view type
 		 */
 		set viewType(type) {
+			let previousViewType = this.viewType;
 			switch (type) {
 				case "message": {
 					this._deck.selectedIndex = 0;
@@ -110,9 +111,11 @@
 					break;
 				}
 			}
-			// If item pane is no selected, do not render
-			this._itemDetails.toggleAttribute("no-render", type == "item");
-			this._itemDetails.sidenav.toggleDefaultStatus(type != "item");
+			let isViewingItem = type == "item";
+			if (previousViewType != "item" && isViewingItem) {
+				this._itemDetails.forceUpdateSideNav();
+			}
+			this._itemDetails.sidenav.toggleDefaultStatus(!isViewingItem);
 		}
 
 		render() {
@@ -466,13 +469,22 @@
 		}
 
 		static get observedAttributes() {
-			return ['collapsed'];
+			return ['collapsed', 'width', 'height'];
 		}
 
-		attributeChangedCallback(name) {
+		attributeChangedCallback(name, value) {
 			switch (name) {
 				case "collapsed": {
 					this.handleResize();
+					break;
+				}
+				case "width": {
+					this.style.width = `${value}px`;
+					break;
+				}
+				case "height": {
+					this.style.height = `${value}px`;
+					break;
 				}
 			}
 		}
