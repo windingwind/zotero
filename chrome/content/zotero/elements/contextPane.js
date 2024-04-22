@@ -302,6 +302,7 @@
 			this._itemPaneDeck.appendChild(itemDetails);
 	
 			itemDetails.editable = editable;
+			itemDetails.tabID = tabID;
 			itemDetails.tabType = "reader";
 			itemDetails.item = targetItem;
 			// Manually cache parentID
