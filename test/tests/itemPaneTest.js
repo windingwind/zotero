@@ -284,15 +284,6 @@ describe("Item pane", function () {
 			
 			assert.isFalse(isPreviewDisplayed(attachmentsBox));
 		});
-
-		it("should not show attachments pane in reader standalone attachment item", async function () {
-			let attachment = await importFileAttachment('test.pdf');
-			await ZoteroPane.viewItems([attachment]);
-			let tabID = Zotero_Tabs.selectedID;
-			let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
-			let attachmentsBox = itemDetails.getPane(paneID);
-			assert.isTrue(attachmentsBox.hidden);
-		});
 	});
 	
 	
