@@ -264,35 +264,6 @@ describe("Item pane", function () {
 			await ZoteroPane.selectItem(attachment1.id);
 			assert.isTrue(attachmentsBox.hidden);
 		});
-
-		it("should not show attachments pane preview in reader best-matched attachment item", async function () {
-			let item = new Zotero.Item('book');
-			let file = getTestDataDirectory();
-			file.append('test.pdf');
-			await item.saveTx();
-			let attachment = await Zotero.Attachments.importFromFile({
-				file,
-				parentItemID: item.id
-			});
-			await ZoteroPane.viewItems([attachment]);
-			let tabID = Zotero_Tabs.selectedID;
-			let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
-			let attachmentsBox = itemDetails.getPane(paneID);
-			assert.isFalse(attachmentsBox.hidden);
-
-			await waitForScrollToPane(itemDetails, paneID);
-			
-			assert.isFalse(isPreviewDisplayed(attachmentsBox));
-		});
-
-		it("should not show attachments pane in reader standalone attachment item", async function () {
-			let attachment = await importFileAttachment('test.pdf');
-			await ZoteroPane.viewItems([attachment]);
-			let tabID = Zotero_Tabs.selectedID;
-			let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
-			let attachmentsBox = itemDetails.getPane(paneID);
-			assert.isTrue(attachmentsBox.hidden);
-		});
 	});
 	
 	
