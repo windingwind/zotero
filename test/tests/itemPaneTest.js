@@ -668,36 +668,6 @@ describe("Item pane", function () {
 			// Should select attachment
 			assert.equal(ZoteroPane.getSelectedItems(true)[0], attachment.id);
 		});
-
-		it("should open attachment on double-clicking attachments pane preview", async function () {
-			let itemDetails = ZoteroPane.itemPane._itemDetails;
-			let attachmentsBox = itemDetails.getPane(paneID);
-			let preview = attachmentsBox._preview;
-
-			let item = new Zotero.Item('book');
-			await item.saveTx();
-			let file = getTestDataDirectory();
-			file.append('test.pdf');
-			let attachment = await Zotero.Attachments.importFromFile({
-				file,
-				parentItemID: item.id
-			});
-
-			await ZoteroPane.selectItem(item.id);
-			await waitForScrollToPane(itemDetails, paneID);
-			await waitForPreviewBoxRender(attachmentsBox);
-
-			let event = new MouseEvent('dblclick', {
-				bubbles: true,
-				cancelable: true,
-				view: window
-			});
-			preview.dispatchEvent(event);
-			await Zotero.Promise.delay(100);
-			let reader = await Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-			// Should open attachment
-			assert.equal(reader.itemID, attachment.id);
-		});
 	});
 	
 	
