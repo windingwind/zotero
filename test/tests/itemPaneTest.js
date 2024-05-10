@@ -292,6 +292,7 @@ describe("Item pane", function () {
 			let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
 			let attachmentsBox = itemDetails.getPane(paneID);
 			assert.isTrue(attachmentsBox.hidden);
+			await Zotero.Promise.delay(1000);
 		});
 	});
 	
