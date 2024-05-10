@@ -287,8 +287,8 @@ describe("Item pane", function () {
 
 		it("should not show attachments pane in reader standalone attachment item", async function () {
 			await Zotero.Promise.delay(1000);
-			// let attachment = await importFileAttachment('test.pdf');
-			// await ZoteroPane.viewItems([attachment]);
+			let attachment = await importFileAttachment('test.pdf');
+			await ZoteroPane.viewItems([attachment]);
 			// let tabID = Zotero_Tabs.selectedID;
 			// let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
 			// let attachmentsBox = itemDetails.getPane(paneID);
