@@ -1318,10 +1318,14 @@ describe("Item pane", function () {
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxRender(attachmentsBox);
 
+			Zotero.debug("[DBG_TEST] Attachment row should exist and be visible", 2);
+
 			// Trash the attachment
 			let trashPromise = waitForNotifierEvent('trash', 'item');
 			await Zotero.Items.trashTx([attachment.id]);
 			await trashPromise;
+
+			Zotero.debug("[DBG_TEST] Attachment is deleted", 2);
 
 			// Wait for the attachment row to be hidden
 			await waitForCallback(
@@ -1329,11 +1333,15 @@ describe("Item pane", function () {
 				, 100, 3);
 			assert.isTrue(getAttachmentRow().hidden);
 
+			Zotero.debug("[DBG_TEST] Attachment row should be hidden", 2);
+
 			// Restore the attachment
 			let restorePromise = waitForNotifierEvent('modify', 'item');
 			attachment.deleted = false;
 			await attachment.saveTx();
 			await restorePromise;
+
+			Zotero.debug("[DBG_TEST] Attachment is restored", 2);
 
 			// Wait for the attachment row to exist and be visible
 			await waitForCallback(
@@ -1342,12 +1350,16 @@ describe("Item pane", function () {
 			assert.exists(getAttachmentRow());
 			assert.isFalse(getAttachmentRow().hidden);
 
+			Zotero.debug("[DBG_TEST] Attachment row should be visible", 2);
+
 			// Basically, our item pane render mechanism will reuse the previous render if the item
 			// is the same. We want to ensure the attachments box is rerendered after
 			// the attachments' trash/restore, even if it's already rendered with the same item.
 			trashPromise = waitForNotifierEvent('trash', 'item');
 			await Zotero.Items.trashTx([attachment.id]);
 			await trashPromise;
+
+			Zotero.debug("[DBG_TEST] Attachment is deleted again", 2);
 
 			// Wait for the attachment row to be hidden
 			await waitForCallback(
@@ -1361,16 +1373,22 @@ describe("Item pane", function () {
 			await ZoteroPane.selectItem(attachment2.id);
 			await waitForPreviewBoxRender(itemDetails.getPane("attachment-info"));
 
+			Zotero.debug("[DBG_TEST] Selected another item", 2);
+
 			// Restore the attachment
 			restorePromise = waitForNotifierEvent('modify', 'item');
 			attachment.deleted = false;
 			await attachment.saveTx();
 			await restorePromise;
 
+			Zotero.debug("[DBG_TEST] Attachment is restored again", 2);
+
 			// Select the item with the restored attachment. A rerender should be triggered
 			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxRender(attachmentsBox);
+
+			Zotero.debug("[DBG_TEST] Selected the item with restored attachment", 2);
 
 			// Wait for the attachment row to exist and be visible
 			await waitForCallback(
@@ -1380,6 +1398,8 @@ describe("Item pane", function () {
 					return row && !row.hidden;
 				}
 				, 100, 3);
+
+			Zotero.debug("[DBG_TEST] Attachment row should be visible again", 2);
 
 			// Should render the attachment row, as the render dependency is different
 			assert.exists(getAttachmentRow());
@@ -1887,9 +1907,13 @@ describe("Item pane", function () {
 			await waitForScrollToPane(itemDetails, paneID);
 
 			// Should scroll to pinned pane
+			let diff = Math.abs(pane.getBoundingClientRect().top - pane.parentElement.getBoundingClientRect().top);
 			assert.isTrue(
-				Math.abs(pane.getBoundingClientRect().top - pane.parentElement.getBoundingClientRect().top) < 3
+				diff < 3,
+				`Expected pane to be scrolled to top, but was scrolled by ${diff}px`
 			);
+
+			Zotero.debug(`[DBG_TEST] pane top: ${pane.getBoundingClientRect().top}, parent top: ${pane.parentElement.getBoundingClientRect().top}`, 2);
 
 			itemDetails.pinnedPane = "";
 			itemDetails._paneParent.scrollTo(0, 0);

@@ -48,7 +48,7 @@ DONE
 	exit 1
 }
 
-DEBUG=false
+DEBUG=true
 DEBUG_LEVEL=5
 while getopts "bcd:e:fg:hs:tx:" opt; do
 	case $opt in
