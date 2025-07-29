@@ -1852,6 +1852,11 @@ describe("Item pane", function () {
 	});
 
 	describe("Item pane and tabs", function () {
+		afterEach(function () {
+			Zotero_Tabs.select("zotero-pane");
+			Zotero_Tabs.closeAll();
+		});
+
 		it("should switch to the correct pane when switching tabs", async function () {
 			// https://github.com/zotero/zotero/issues/4531#issuecomment-2470874876
 			let attachment = await importFileAttachment('test.pdf');
