@@ -50,6 +50,7 @@ describe("Item pane", function () {
 	
 	before(function* () {
 		win = yield loadZoteroPane();
+		win.resizeTo(1000, 800);
 		doc = win.document;
 		ZoteroPane = win.ZoteroPane;
 		Zotero_Tabs = win.Zotero_Tabs;
@@ -713,7 +714,6 @@ describe("Item pane", function () {
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
 			Zotero_Tabs.closeAll();
-			win.resizeTo(1000, 800);
 		});
 
 		it("should show attachments pane in library for regular item", async function () {
