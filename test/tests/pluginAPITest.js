@@ -34,6 +34,7 @@ describe("Plugin API", function () {
 		ZoteroContextPane = win.ZoteroContextPane;
 		_itemsView = win.ZoteroPane.itemsView;
 		infoSection = win.ZoteroPane.itemPane._itemDetails.getPane('info');
+		win.resizeTo(1000, 800);
 	});
 
 	after(function () {
