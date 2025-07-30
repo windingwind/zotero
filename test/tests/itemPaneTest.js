@@ -60,7 +60,7 @@ describe("Item pane", function () {
 	after(function () {
 		Zotero_Tabs.select("zotero-pane");
 		Zotero_Tabs.closeAll();
-		win.close();
+		// win.close();
 	});
 
 	describe("Item pane header", function () {
@@ -257,7 +257,7 @@ describe("Item pane", function () {
 			var label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, '');
 			
-			let promise = await waitForItemEvent('modify');
+			let promise = waitForItemEvent('modify');
 			item.setField('series', 'Test');
 			await item.saveTx();
 			await promise;
