@@ -257,8 +257,10 @@ describe("Item pane", function () {
 			var label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, '');
 			
+			let promise = await waitForItemEvent('modify');
 			item.setField('series', 'Test');
 			await item.saveTx();
+			await promise;
 			
 			label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, 'Test');
