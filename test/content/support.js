@@ -131,12 +131,10 @@ async function activateZoteroPane() {
 	if (!win) {
 		throw new Error('Main window is not open');
 	}
-	// If the window is already active, we're done.
-	// The main window is active from the start on Linux, but opens in the
-	// background on other platforms.
-	if (Services.focus.activeWindow === win) {
-		return;
-	}
+	
+	// Always blur the window first to ensure the activate promise is resolved
+	win.blur();
+	
 	let activatePromise = new Promise(
 		resolve => win.addEventListener('activate', resolve, { once: true })
 	);
