@@ -2248,6 +2248,7 @@ describe("Item pane", function () {
 		});
 
 		it("should initially show sidenav toggle", async function () {
+			await Zotero.Promise.delay(100);
 			assert.isFalse(isCollapsed());
 			assert.equal(getVisibleToggle(), 'item pane sidenav');
 		});
