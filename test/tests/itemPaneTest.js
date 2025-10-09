@@ -1321,8 +1321,7 @@ describe("Item pane", function () {
 			// Scroll the attachments pane out of view
 			await waitForScrollToPane(itemDetails, 'info');
 
-			// Wait a bit for the preview to be discarded
-			await Zotero.Promise.delay(discardTimeout + 100);
+			await waitForCallback(() => !attachmentsBox._preview._isReaderInitialized);
 			
 			assert.isFalse(attachmentsBox._preview._isReaderInitialized);
 
