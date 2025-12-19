@@ -419,6 +419,7 @@ function getWindows(uri) {
  */
 function waitForCallback(cb, interval, timeout) {
 	var deferred = Zotero.Promise.defer();
+	var stack = new Error().stack;
 	if(interval === undefined) interval = 100;
 	if(timeout === undefined) timeout = 10000;
 	var start = Date.now();
@@ -429,7 +430,7 @@ function waitForCallback(cb, interval, timeout) {
 			deferred.resolve(success);
 		} else if(Date.now() - start > timeout*1000) {
 			clearInterval(id);
-			deferred.reject(new Error("Promise timed out"));
+			deferred.reject(new Error("Promise timed out\n" + stack));
 		}
 	}, interval);
 	return deferred.promise;

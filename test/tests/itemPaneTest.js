@@ -1727,6 +1727,10 @@ describe("Item pane", function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentBox = itemDetails.getPane(paneID);
 
+			// Force abort any pending renders
+			attachmentBox._preview?.remove();
+			attachmentBox._preview = null;
+
 			const discardTimeout = 50;
 
 			// Temporarily set discard timeout for testing before any operations
