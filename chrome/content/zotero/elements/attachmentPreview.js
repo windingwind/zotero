@@ -558,6 +558,11 @@
 			}
 			this._debug("Preview discarded");
 
+			// Clean up state immediately -- the reader is already destroyed above,
+			// so these should be reset before the potentially-slow next-preview preload.
+			this._lastRenderID = null;
+			this._isReaderInitialized = false;
+
 			// Preload a new next-preview
 			await this._nextPreviewInitializePromise.promise;
 			this._nextPreviewInitializePromise = Zotero.Promise.defer();
@@ -567,10 +572,7 @@
 			this._id("preview")?.after(this.nextPreview);
 			this.setPreviewStatus("loading");
 
-			// Clean up after discarding
 			this._isDiscarding = false;
-			this._lastRenderID = null;
-			this._isReaderInitialized = false;
 
 			this._debug("Discard processed");
 		}
